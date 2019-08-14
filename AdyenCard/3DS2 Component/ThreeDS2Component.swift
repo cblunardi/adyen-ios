@@ -9,6 +9,11 @@ import Foundation
 
 /// Handles the 3D Secure 2 fingerprint and challenge.
 public final class ThreeDS2Component: ActionComponent {
+
+    /// The component-specific errors.
+    public enum ThreeDS2ComponentError: Error {
+        case missingTransaction
+    }
     
     /// The appearance configuration of the 3D Secure 2 challenge UI.
     public let appearanceConfiguration = ADYAppearanceConfiguration()
@@ -63,7 +68,10 @@ public final class ThreeDS2Component: ActionComponent {
     ///
     /// - Parameter action: The challenge action as received from the Checkout API.
     public func handle(_ action: ThreeDS2ChallengeAction) {
-        guard let transaction = transaction else { return }
+        guard let transaction = transaction else {
+            didFail(with: ThreeDS2ComponentError.missingTransaction)
+            return
+        }
         
         Analytics.sendEvent(component: challengeEventName, flavor: _isDropIn ? .dropin : .components, environment: environment)
         
